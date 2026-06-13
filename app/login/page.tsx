@@ -1,73 +1,113 @@
-// app/login/page.tsx
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-export default function Login() {
+export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const router = useRouter();
+  const [showAlert, setShowAlert] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = () => {
     if (email === 'admin@jobprostuti.com' && password === 'admin123') {
-      document.cookie = 'isLoggedIn=true; path=/; max-age=86400; samesite=lax';
-      localStorage.setItem('isLoggedIn', 'true');
-      router.push('/');
+      setShowAlert(false);
+      setIsSuccess(true);
     } else {
-      alert('ইমেইল বা পাসওয়ার্ড ভুল');
+      setShowAlert(true);
+      setIsSuccess(false);
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleLogin();
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-700">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-block p-3 bg-blue-100 rounded-full mb-4">
-            <svg className="h-12 w-12 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-800">Job Prostuti</h1>
-          <p className="text-gray-600 mt-2">অ্যাডমিন প্যানেলে স্বাগতম</p>
-        </div>
+    <div className="font-sans min-h-screen bg-[#f0f2f1] flex items-center justify-center overflow-hidden relative select-none">
+      {/* Subtle background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#e8eae9] via-[#f5f5f3] to-[#edf4f0] z-0"></div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label className="block text-gray-700 mb-2 font-medium">ইমেইল</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="admin@jobprostuti.com"
-              required
-            />
-          </div>
+      {/* Concrete-like texture lines top-left */}
+      <div className="absolute top-0 left-0 w-[260px] h-[260px] opacity-22 z-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(135deg, #d4d6d5 1px, transparent 1px),
+            linear-gradient(45deg, #d4d6d5 1px, transparent 1px)
+          `,
+          backgroundSize: '28px 28px'
+        }}>
+      </div>
 
-          <div>
-            <label className="block text-gray-700 mb-2 font-medium">পাসওয়ার্ড</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="********"
-              required
-            />
-          </div>
+      {/* Top-right texture */}
+      <div className="absolute top-0 right-0 w-[220px] h-[220px] opacity-22 z-0"
+        style={{
+          backgroundImage: `
+            linear-gradient(135deg, #d4d6d5 1px, transparent 1px),
+            linear-gradient(45deg, #d4d6d5 1px, transparent 1px)
+          `,
+          backgroundSize: '28px 28px'
+        }}>
+      </div>
 
-          <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-            লগইন করুন
-          </button>
-        </form>
+      {/* Geometric accent corners */}
+      <div className="absolute -top-5 -left-5 w-[180px] h-[180px] border-[28px] border-[#c8cac9] opacity-18 rotate-12 z-0"></div>
+      <div className="absolute -bottom-[30px] -right-[30px] w-[150px] h-[150px] border-[22px] border-[#c8cac9] opacity-14 -rotate-8 z-0"></div>
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600">
-            ডেমো: admin@jobprostuti.com / admin123
-          </p>
-        </div>
+      {/* Main wrapper */}
+      <div className="relative z-10 flex items-center justify-center gap-7 w-full max-w-[1200px] px-5 py-8">
+
+       {/* LOGIN CARD - with green glow hover effect */}
+<div className="bg-white rounded-[26px] py-10 px-9 shadow-[0_20px_60px_rgba(0,0,0,0.07)] border border-[rgba(240,240,240,0.9)] w-full max-w-[420px] flex-shrink-0 transition-all duration-300 ease-in-out hover:shadow-[0_20px_60px_rgba(16,185,129,0.15)] hover:border-[#10b981] hover:shadow-[0_0_0_3px_rgba(16,185,129,0.1)]">
+  <div className="flex flex-col items-center mb-8">
+    <div className="text-[#059669] mb-2 transition-transform duration-300 group-hover:scale-110">
+      <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+      </svg>
+    </div>
+    <div className="text-[22px] font-bold text-[#1e293b] tracking-tight">Job Prostuti</div>
+    <div className="text-[11px] font-semibold tracking-wide text-[#059669] mt-1">Learn &amp; Grow</div>
+  </div>
+
+  <div className="mb-[18px]">
+    <label className="block text-[13px] font-semibold text-[#374151] mb-[7px] ml-[10px]">Email</label>
+    <input
+      type="email"
+      placeholder="admin@jobprostuti.com"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      onKeyDown={handleKeyDown}
+      className="w-full max-w-[390px] ml-[10px] h-11 rounded-xl border border-[#e2e4e3] bg-[#f9fafb] px-4 text-sm text-[#1e293b] outline-none transition-all duration-200 focus:border-[#10b981] focus:bg-white focus:shadow-[0_0_0_3px_rgba(16,185,129,0.12)] placeholder:text-[#9ca3af] hover:border-[#10b981]"
+    />
+  </div>
+
+  <div className="mb-[18px]">
+    <label className="block text-[13px] font-semibold text-[#374151] mb-[7px] ml-[10px]">Password</label>
+    <input
+      type="password"
+      placeholder="••••••••"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      onKeyDown={handleKeyDown}
+      className="w-full max-w-[390px] ml-[10px] h-11 rounded-xl border border-[#e2e4e3] bg-[#f9fafb] px-4 text-sm text-[#1e293b] outline-none transition-all duration-200 focus:border-[#10b981] focus:bg-white focus:shadow-[0_0_0_3px_rgba(16,185,129,0.12)] placeholder:text-[#9ca3af] hover:border-[#10b981]"
+    />
+  </div>
+
+  <button
+    onClick={handleLogin}
+    className={`w-full h-11 rounded-xl font-bold text-sm tracking-wide shadow-[0_4px_14px_rgba(5,150,105,0.18)] transition-all duration-200 active:scale-[0.99] ${
+      isSuccess 
+        ? 'bg-[#047857] text-white hover:bg-[#065f46]' 
+        : 'bg-[#059669] text-white hover:bg-[#047857] hover:shadow-[0_6px_20px_rgba(5,150,105,0.25)] hover:-translate-y-0.5'
+    }`}
+  >
+    {isSuccess ? '✓ Login Successful' : 'Login'}
+  </button>
+
+  <div className={`mt-3.5 bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] text-xs font-semibold rounded-xl py-2.5 px-3.5 text-center transition-all duration-200 ${showAlert ? 'block' : 'hidden'}`}>
+    ইমেইল বা পাসওয়ার্ড ভুল
+  </div>
+</div>
+
       </div>
     </div>
   );
