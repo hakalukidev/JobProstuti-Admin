@@ -9,6 +9,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const demoAdminEmail = process.env.NEXT_PUBLIC_DEMO_ADMIN_EMAIL ?? 'admin@jobprostuti.com';
+  const demoAdminPassword = process.env.NEXT_PUBLIC_DEMO_ADMIN_PASSWORD ?? 'admin123';
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -16,8 +18,16 @@ export default function LoginPage() {
     setShowAlert(false);
 
     setTimeout(() => {
-      if (email === 'admin@jobprostuti.com' && password === 'admin123') {
-        document.cookie = `isLoggedIn=true; path=/; max-age=${60 * 60 * 24}; SameSite=Strict; Secure`;
+      if (email === demoAdminEmail && password === demoAdminPassword) {
+        const cookieParts = [
+          'isLoggedIn=true',
+          'path=/',
+          `max-age=${60 * 60 * 24}`,
+          'SameSite=Strict',
+          window.location.protocol === 'https:' ? 'Secure' : '',
+        ].filter(Boolean);
+
+        document.cookie = cookieParts.join('; ');
         router.push('/');
       } else {
         setShowAlert(true);
