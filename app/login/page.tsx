@@ -8,113 +8,182 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showAlert, setShowAlert] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (email === 'admin@jobprostuti.com' && password === 'admin123') {
-      setShowAlert(false);
-      setIsSuccess(true);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setShowAlert(false);
 
-      // middleware.ts cookie check needs: isLoggedIn=true
-      document.cookie = `isLoggedIn=true; path=/; max-age=${60 * 60 * 24}`;
-
-      // dashboard route = app/page.tsx => '/'
-      router.push('/');
-    } else {
-      setShowAlert(true);
-      setIsSuccess(false);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleLogin();
+    setTimeout(() => {
+      if (email === 'admin@jobprostuti.com' && password === 'admin123') {
+        document.cookie = `isLoggedIn=true; path=/; max-age=${60 * 60 * 24}; SameSite=Strict; Secure`;
+        router.push('/');
+      } else {
+        setShowAlert(true);
+        setIsLoading(false);
+      }
+    }, 800);
   };
 
   return (
-    <div className="font-sans min-h-screen bg-[#f0f2f1] flex items-center justify-center overflow-hidden relative select-none">
-      {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#e8eae9] via-[#f5f5f3] to-[#edf4f0] z-0"></div>
+    <div className="min-h-screen w-full bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/20 text-slate-900 font-sans antialiased flex items-center justify-center relative py-12 px-4 sm:px-6 lg:px-8 overflow-x-hidden selection:bg-emerald-600 selection:text-white">
+      
+      {/* Decorative Background Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] z-0 opacity-40 pointer-events-none" />
 
-      {/* Concrete-like texture lines top-left */}
-      <div className="absolute top-0 left-0 w-[260px] h-[260px] opacity-22 z-0"
-        style={{
-          backgroundImage: `
-            linear-gradient(135deg, #d4d6d5 1px, transparent 1px),
-            linear-gradient(45deg, #d4d6d5 1px, transparent 1px)
-          `,
-          backgroundSize: '28px 28px'
-        }}>
-      </div>
+      {/* Main Container */}
+      <div className="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+        
+        {/* LEFT COLUMN: LOGIN FORM */}
+        <div className="w-full sm:max-w-md mx-auto lg:max-w-none lg:col-span-5 flex flex-col justify-center">
+          
+          {/* Colorful Logo Brand */}
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-200 flex-shrink-0">
+              <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent">Job Prostuti</h1>
+              <p className="text-[10px] font-bold tracking-widest text-emerald-500 uppercase mt-0.5">Learn & Grow</p>
+            </div>
+          </div>
 
-      {/* Top-right texture */}
-      <div className="absolute top-0 right-0 w-[220px] h-[220px] opacity-22 z-0"
-        style={{
-          backgroundImage: `
-            linear-gradient(135deg, #d4d6d5 1px, transparent 1px),
-            linear-gradient(45deg, #d4d6d5 1px, transparent 1px)
-          `,
-          backgroundSize: '28px 28px'
-        }}>
-      </div>
+          {/* Form Header */}
+          <div className="mb-8">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-800">স্বাগতম</h2>
+            <p className="text-sm text-slate-500 mt-2">অ্যাডমিন প্যানেলে প্রবেশ করতে আপনার ক্রেডেনশিয়াল দিন</p>
+          </div>
 
-      {/* Geometric accent corners */}
-      <div className="absolute -top-5 -left-5 w-[180px] h-[180px] border-[28px] border-[#c8cac9] opacity-18 rotate-12 z-0"></div>
-      <div className="absolute -bottom-[30px] -right-[30px] w-[150px] h-[150px] border-[22px] border-[#c8cac9] opacity-14 -rotate-8 z-0"></div>
+          {/* Login Form */}
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label htmlFor="email" className="block text-xs font-semibold text-slate-700 mb-2">
+                ইমেইল ঠিকানা
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                disabled={isLoading}
+                placeholder="admin@jobprostuti.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-slate-50 disabled:text-slate-400 shadow-sm"
+              />
+            </div>
 
-      {/* Main wrapper */}
-      <div className="relative z-10 flex items-center justify-center gap-7 w-full max-w-[1200px] px-5 py-8">
+            <div>
+              <div className="flex justify-between items-center mb-2">
+                <label htmlFor="password" className="block text-xs font-semibold text-slate-700">
+                  পাসওয়ার্ড
+                </label>
+                <a href="#" className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+                  পাসওয়ার্ড ভুলে গেছেন?
+                </a>
+              </div>
+              <input
+                id="password"
+                type="password"
+                required
+                disabled={isLoading}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-slate-50 disabled:text-slate-400 shadow-sm"
+              />
+            </div>
 
-       {/* LOGIN CARD - with green glow hover effect */}
-<div className="bg-white rounded-[26px] py-10 px-9 shadow-[0_20px_60px_rgba(0,0,0,0.07)] border border-[rgba(240,240,240,0.9)] w-full max-w-[420px] flex-shrink-0 transition-all duration-300 ease-in-out hover:shadow-[0_20px_60px_rgba(16,185,129,0.15)] hover:border-[#10b981] hover:shadow-[0_0_0_3px_rgba(16,185,129,0.1)]">
-  <div className="flex flex-col items-center mb-8">
-    <div className="text-[#059669] mb-2 transition-transform duration-300 group-hover:scale-110">
-      <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-      </svg>
-    </div>
-    <div className="text-[22px] font-bold text-[#1e293b] tracking-tight">Job Prostuti</div>
-    <div className="text-[11px] font-semibold tracking-wide text-[#059669] mt-1">Learn &amp; Grow</div>
-  </div>
+            {/* Error Alert */}
+            {showAlert && (
+              <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium rounded-xl p-3.5 flex items-center gap-2.5">
+                <svg className="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span>ইমেইল বা পাসওয়ার্ড ভুল হয়েছে</span>
+              </div>
+            )}
 
-  <div className="mb-[18px]">
-    <label className="block text-[13px] font-semibold text-[#374151] mb-[7px] ml-[10px]">Email</label>
-    <input
-      type="email"
-      placeholder="admin@jobprostuti.com"
-      value={email}
-      onChange={(e) => setEmail(e.target.value)}
-      onKeyDown={handleKeyDown}
-      className="w-full max-w-[390px] ml-[10px] h-11 rounded-xl border border-[#e2e4e3] bg-[#f9fafb] px-4 text-sm text-[#1e293b] outline-none transition-all duration-200 focus:border-[#10b981] focus:bg-white focus:shadow-[0_0_0_3px_rgba(16,185,129,0.12)] placeholder:text-[#9ca3af] hover:border-[#10b981]"
-    />
-  </div>
+            {/* Login Button */}
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full h-12 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md shadow-emerald-200 flex items-center justify-center gap-2 disabled:bg-slate-300 disabled:from-none disabled:to-none disabled:cursor-not-allowed"
+            >
+              {isLoading ? (
+                <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+              ) : (
+                'লগইন করুন'
+              )}
+            </button>
+          </form>
+        </div>
 
-  <div className="mb-[18px]">
-    <label className="block text-[13px] font-semibold text-[#374151] mb-[7px] ml-[10px]">Password</label>
-    <input
-      type="password"
-      placeholder="••••••••"
-      value={password}
-      onChange={(e) => setPassword(e.target.value)}
-      onKeyDown={handleKeyDown}
-      className="w-full max-w-[390px] ml-[10px] h-11 rounded-xl border border-[#e2e4e3] bg-[#f9fafb] px-4 text-sm text-[#1e293b] outline-none transition-all duration-200 focus:border-[#10b981] focus:bg-white focus:shadow-[0_0_0_3px_rgba(16,185,129,0.12)] placeholder:text-[#9ca3af] hover:border-[#10b981]"
-    />
-  </div>
+        {/* RIGHT COLUMN: COLORFUL IMAGE & METRICS */}
+        <div className="hidden lg:flex lg:col-span-7 flex-col gap-6 w-full">
+          
+          {/* Colorful Image Container */}
+          <div className="relative rounded-2xl overflow-hidden border border-emerald-100 shadow-xl shadow-emerald-100/30 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 w-full h-[400px]">
+            <img
+              src="https://images.pexels.com/photos/3184418/pexels-photo-3184418.jpeg?auto=compress&cs=tinysrgb&w=1200"
+              alt="Job Prostuti Admin Dashboard"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-700 ease-in-out"
+            />
+            {/* Overlay Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-emerald-900/40 via-transparent to-transparent"></div>
+            
+            {/* Caption Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-emerald-900/80 to-transparent">
+              <p className="text-lg font-bold text-white">Job Prostuti Admin Panel</p>
+              <p className="text-sm text-white/80 mt-1">প্ল্যাটফর্ম পরিচালনা করুন আত্মবিশ্বাসের সাথে</p>
+              <div className="flex items-center gap-2 mt-3">
+                <div className="flex -space-x-2">
+                  {['🎓', '📚', '💼', '📊'].map((emoji, i) => (
+                    <div key={i} className="w-7 h-7 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-xs">
+                      {emoji}
+                    </div>
+                  ))}
+                </div>
+                <span className="text-xs text-white/80">১৫,৪২০+ সক্রিয় ব্যবহারকারী</span>
+              </div>
+            </div>
+          </div>
 
-  <button
-    onClick={handleLogin}
-    className={`w-full h-11 rounded-xl font-bold text-sm tracking-wide shadow-[0_4px_14px_rgba(5,150,105,0.18)] transition-all duration-200 active:scale-[0.99] ${
-      isSuccess 
-        ? 'bg-[#047857] text-white hover:bg-[#065f46]' 
-        : 'bg-[#059669] text-white hover:bg-[#047857] hover:shadow-[0_6px_20px_rgba(5,150,105,0.25)] hover:-translate-y-0.5'
-    }`}
-  >
-    {isSuccess ? '✓ Login Successful' : 'Login'}
-  </button>
+          {/* Colorful Stats Cards */}
+          <div className="grid grid-cols-3 gap-5">
+            {[
+              { title: 'মোট ব্যবহারকারী', value: '১৫,৪২০', icon: '👥', color: 'from-emerald-500 to-emerald-600', bg: 'bg-emerald-50' },
+              { title: 'সক্রিয় সাবস্ক্রিপশন', value: '৫,৪০১', icon: '📊', color: 'from-teal-500 to-teal-600', bg: 'bg-teal-50' },
+              { title: 'মোট পরীক্ষা', value: '২৫৬', icon: '📝', color: 'from-green-500 to-green-600', bg: 'bg-green-50' },
+            ].map((metric, idx) => (
+              <div key={idx} className={`${metric.bg} rounded-xl p-4 border border-${metric.color.split(' ')[1].replace('from-', '')}/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-1`}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl">{metric.icon}</span>
+                  <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${metric.color} opacity-20`}></div>
+                </div>
+                <p className="text-2xl font-bold text-slate-800">{metric.value}</p>
+                <p className="text-[11px] font-medium text-slate-500 mt-1">{metric.title}</p>
+              </div>
+            ))}
+          </div>
 
-  <div className={`mt-3.5 bg-[#fef2f2] border border-[#fecaca] text-[#dc2626] text-xs font-semibold rounded-xl py-2.5 px-3.5 text-center transition-all duration-200 ${showAlert ? 'block' : 'hidden'}`}>
-    ইমেইল বা পাসওয়ার্ড ভুল
-  </div>
-</div>
+          {/* Additional Info Bar */}
+          <div className="flex items-center justify-between pt-3 border-t border-emerald-100">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <span className="text-xs text-slate-500">সিস্টেম সচল</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-slate-400">🔒 SSL সুরক্ষিত</span>
+              <span className="text-xs text-slate-400">⚡ রিয়েল-টাইম আপডেট</span>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>

@@ -1,0 +1,38 @@
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #0f172a;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-white border border-gray-200 rounded-2xl shadow-sm;
+  }
+
+  .btn-primary {
+    @apply bg-gradient-to-r from-gray-800 to-gray-900 text-white transition-all duration-200;
+  }
+  
+  .btn-primary:hover {
+    @apply brightness-110 -translate-y-px;
+  }
+
+  .input-field {
+    @apply bg-white border border-gray-200 text-gray-900 rounded-xl focus:border-gray-900 focus:ring-2 focus:ring-gray-900/10 outline-none transition-all;
+  }
+}
