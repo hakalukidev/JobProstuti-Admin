@@ -1,10 +1,11 @@
 'use client';
 
+import { apiService } from '@/services/api';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
 const navigationItems = [
-  { href: '/', label: 'Dashboard' },
+  { href: '/dashboard', label: 'Dashboard' },
   { href: '/users', label: 'Users' },
   { href: '/questions', label: 'Questions' },
   { href: '/exams', label: 'Exams' },
@@ -22,7 +23,7 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     document.cookie = 'isLoggedIn=; path=/; max-age=0; samesite=lax';
-    localStorage.removeItem('isLoggedIn');
+    apiService.clearToken();
     router.push('/login');
     router.refresh();
   };

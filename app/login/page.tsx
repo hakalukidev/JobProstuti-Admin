@@ -1,5 +1,6 @@
 'use client';
 
+import { apiService } from '@/services/api';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -9,16 +10,16 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const demoAdminEmail = process.env.NEXT_PUBLIC_DEMO_ADMIN_EMAIL ?? 'admin@jobprostuti.com';
-  const demoAdminPassword = process.env.NEXT_PUBLIC_DEMO_ADMIN_PASSWORD ?? 'admin123';
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setShowAlert(false);
 
-    setTimeout(() => {
-      if (email === demoAdminEmail && password === demoAdminPassword) {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      const response = await apiService.login(email, password);
+
+      if (response?.success) {
         const cookieParts = [
           'isLoggedIn=true',
           'path=/',
@@ -28,12 +29,16 @@ export default function LoginPage() {
         ].filter(Boolean);
 
         document.cookie = cookieParts.join('; ');
-        router.push('/');
-      } else {
-        setShowAlert(true);
-        setIsLoading(false);
+        router.push('/dashboard');
+        return;
       }
-    }, 800);
+
+      setShowAlert(true);
+    } catch {
+      setShowAlert(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
