@@ -1,8 +1,10 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showAlert, setShowAlert] = useState(false);
@@ -12,6 +14,12 @@ export default function LoginPage() {
     if (email === 'admin@jobprostuti.com' && password === 'admin123') {
       setShowAlert(false);
       setIsSuccess(true);
+
+      // middleware.ts cookie check needs: isLoggedIn=true
+      document.cookie = `isLoggedIn=true; path=/; max-age=${60 * 60 * 24}`;
+
+      // dashboard route = app/page.tsx => '/'
+      router.push('/');
     } else {
       setShowAlert(true);
       setIsSuccess(false);
