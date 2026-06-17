@@ -28,7 +28,11 @@ class ApiService {
   private async request(endpoint: string, options: RequestInit = {}) {
     const token = this.getToken();
     const headers = new Headers(options.headers || {});
-    headers.set('Content-Type', 'application/json');
+    
+    // Only set Content-Type for non-FormData requests
+    if (!(options.body instanceof FormData)) {
+      headers.set('Content-Type', 'application/json');
+    }
 
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
@@ -39,7 +43,19 @@ class ApiService {
       headers,
     });
 
-    const data = await response.json();
+    // Avoid JSON.parse crashes when server returns HTML/text/empty
+    const contentType = response.headers.get('content-type') || '';
+    const raw = await response.text();
+
+    let data: any = null;
+    const looksLikeJson = contentType.includes('application/json') || raw.trim().startsWith('{') || raw.trim().startsWith('[');
+    if (raw && looksLikeJson) {
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        // keep data as null; we'll throw a helpful error below
+      }
+    }
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -48,18 +64,54 @@ class ApiService {
           window.location.href = '/login';
         }
       }
-      throw new Error(data.message || 'Something went wrong');
+      const message = data?.message || (raw ? raw.slice(0, 200) : null) || 'Something went wrong';
+      throw new Error(message);
+    }
+
+    // For successful responses, still handle unexpected non-JSON
+    if (data === null) {
+      throw new Error(raw ? raw.slice(0, 200) : 'Empty response');
     }
 
     return data;
   }
 
-  // Auth endpoints
-  async login(email: string, password: string) {
-    const data = await this.request('/auth/login', {
+  // ============== HTTP Methods ==============
+  async get(endpoint: string, options?: RequestInit) {
+    return this.request(endpoint, { ...options, method: 'GET' });
+  }
+
+  async post(endpoint: string, body?: any, options?: RequestInit) {
+    return this.request(endpoint, {
+      ...options,
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: body instanceof FormData ? body : JSON.stringify(body),
     });
+  }
+
+  async put(endpoint: string, body?: any, options?: RequestInit) {
+    return this.request(endpoint, {
+      ...options,
+      method: 'PUT',
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    });
+  }
+
+  async delete(endpoint: string, options?: RequestInit) {
+    return this.request(endpoint, { ...options, method: 'DELETE' });
+  }
+
+  async patch(endpoint: string, body?: any, options?: RequestInit) {
+    return this.request(endpoint, {
+      ...options,
+      method: 'PATCH',
+      body: body instanceof FormData ? body : JSON.stringify(body),
+    });
+  }
+
+  // ============== Auth endpoints ==============
+  async login(email: string, password: string) {
+    const data = await this.post('/auth/login', { email, password });
     
     if (data.token) {
       this.setToken(data.token);
@@ -69,96 +121,68 @@ class ApiService {
   }
 
   async getProfile() {
-    return this.request('/auth/me');
+    return this.get('/auth/me');
   }
 
-  // Admin endpoints
+  // ============== Admin endpoints ==============
   async getUsers(page: number = 1, limit: number = 10, search?: string) {
     let url = `/admin/users?page=${page}&limit=${limit}`;
     if (search) url += `&search=${search}`;
-    return this.request(url);
+    return this.get(url);
   }
 
   async getUserStats() {
-    return this.request('/admin/stats');
+    return this.get('/admin/stats');
   }
 
   async getDashboardOverview() {
-    return this.request('/admin/dashboard');
+    return this.get('/admin/dashboard');
   }
 
   async updateUser(userId: string, data: any) {
-    return this.request(`/admin/users/${userId}`, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    });
+    return this.put(`/admin/users/${userId}`, data);
   }
 
   async deleteUser(userId: string) {
-    return this.request(`/admin/users/${userId}`, {
-      method: 'DELETE',
-    });
+    return this.delete(`/admin/users/${userId}`);
   }
 
   async createUser(userData: any) {
-    return this.request('/admin/users', {
-      method: 'POST',
-      body: JSON.stringify(userData),
-    });
+    return this.post('/admin/users', userData);
   }
 
-  // Course endpoints
+  // ============== Course endpoints ==============
   async getCourses() {
-    return this.request('/courses');
+    return this.get('/courses');
   }
 
   async createCourse(courseData: any) {
-    return this.request('/courses', {
-      method: 'POST',
-      body: JSON.stringify(courseData),
-    });
+    return this.post('/courses', courseData);
   }
 
   async updateCourse(courseId: string, courseData: any) {
-    return this.request(`/courses/${courseId}`, {
-      method: 'PUT',
-      body: JSON.stringify(courseData),
-    });
+    return this.put(`/courses/${courseId}`, courseData);
   }
 
   async deleteCourse(courseId: string) {
-    return this.request(`/courses/${courseId}`, {
-      method: 'DELETE',
-    });
+    return this.delete(`/courses/${courseId}`);
   }
 
-  // Category endpoints
+  // ============== Category endpoints ==============
   async getCategories() {
-    return this.request('/categories');
+    return this.get('/categories');
   }
 
   async createCategory(categoryData: any) {
-    return this.request('/categories', {
-      method: 'POST',
-      body: JSON.stringify(categoryData),
-    });
+    return this.post('/categories', categoryData);
   }
 
-  // File upload
+  // ============== File upload ==============
   async uploadFile(file: File, type: string = 'image') {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('type', type);
-
-    const token = this.getToken();
-    const response = await fetch(`${API_URL}/upload`, {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData,
-    });
-
-    const data = await response.json();
-    return data;
+    return this.post('/upload', formData);
   }
 }
 
