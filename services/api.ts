@@ -1,8 +1,16 @@
 // services/api.ts
+// ✅ API_URL এর শেষে /api নেই (শুধু ডোমেইন)
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://job-backend-production-fe91.up.railway.app';
 
 class ApiService {
   private token: string | null = null;
+  private baseURL: string;
+
+  constructor() {
+    // ✅ শেষের /api সরিয়ে দিন (যদি থাকে)
+    this.baseURL = API_URL.replace(/\/api\/?$/, '');
+    console.log('📡 API Base URL:', this.baseURL);
+  }
 
   setToken(token: string) {
     this.token = token;
@@ -52,7 +60,14 @@ class ApiService {
       console.warn(`⚠️ ${endpoint} - No token available`);
     }
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
+    // ✅ সঠিক URL তৈরি করুন - ডাবল স্ল্যাশ এবং ডাবল /api প্রতিরোধ
+    const cleanBase = this.baseURL.replace(/\/+$/, '');
+    const cleanEndpoint = endpoint.replace(/^\/+/, '');
+    const url = `${cleanBase}/${cleanEndpoint}`;
+    
+    console.log(`📡 FULL URL: ${url}`); // ডিবাগিং
+
+    const response = await fetch(url, {
       ...options,
       headers,
     });
@@ -111,11 +126,11 @@ class ApiService {
     return this.request(endpoint, { ...options, method: 'DELETE' });
   }
 
-  // ✅ Auth - demo-login সরিয়ে login ব্যবহার করুন
+  // ✅ Auth - endpoint থেকে /api সরান
   async login(email: string, password: string) {
     console.log('🔐 Login called');
-    // ✅ এখন /api/admin/login ব্যবহার করুন
-    const response = await this.post('/api/admin/login', { email, password });
+    // ✅ এখন /admin/login (প্রথমে /api নেই)
+    const response = await this.post('/admin/login', { email, password });
     console.log('📥 Login response:', response);
     if (response.token) {
       this.setToken(response.token);
@@ -125,29 +140,35 @@ class ApiService {
   }
 
   async getProfile() {
-    return this.get('/api/auth/profile');
+    // ✅ /auth/profile (প্রথমে /api নেই)
+    return this.get('/auth/profile');
   }
 
   // Dashboard
   async getDashboardOverview() {
     console.log('📊 getDashboardOverview called');
-    return this.get('/api/admin/dashboard');
+    // ✅ /admin/dashboard (প্রথমে /api নেই)
+    return this.get('/admin/dashboard');
   }
 
   async getUsers(page: number = 1, limit: number = 10) {
-    return this.get(`/api/admin/users?page=${page}&limit=${limit}`);
+    // ✅ /admin/users (প্রথমে /api নেই)
+    return this.get(`/admin/users?page=${page}&limit=${limit}`);
   }
 
   async getUserStats() {
-    return this.get('/api/admin/stats');
+    // ✅ /admin/stats (প্রথমে /api নেই)
+    return this.get('/admin/stats');
   }
 
   async updateUser(userId: string, data: any) {
-    return this.put(`/api/admin/users/${userId}`, data);
+    // ✅ /admin/users (প্রথমে /api নেই)
+    return this.put(`/admin/users/${userId}`, data);
   }
 
   async deleteUser(userId: string) {
-    return this.delete(`/api/admin/users/${userId}`);
+    // ✅ /admin/users (প্রথমে /api নেই)
+    return this.delete(`/admin/users/${userId}`);
   }
 }
 
