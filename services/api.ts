@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api';
 
 class ApiService {
   private token: string | null = null;
@@ -8,13 +8,23 @@ class ApiService {
     if (typeof window !== 'undefined') {
       localStorage.setItem('admin_token', token);
     }
+    console.log('✅ Token set in apiService');
   }
 
   getToken(): string | null {
-    if (this.token) return this.token;
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('admin_token');
+    if (this.token) {
+      console.log('🔑 Token from memory');
+      return this.token;
     }
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('admin_token');
+      if (token) {
+        this.token = token;
+        console.log('🔑 Token from localStorage');
+        return token;
+      }
+    }
+    console.log('❌ No token found');
     return null;
   }
 
@@ -23,19 +33,22 @@ class ApiService {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('admin_token');
     }
+    console.log('🗑️ Token cleared');
   }
 
   private async request(endpoint: string, options: RequestInit = {}) {
     const token = this.getToken();
     const headers = new Headers(options.headers || {});
     
-    // Only set Content-Type for non-FormData requests
     if (!(options.body instanceof FormData)) {
       headers.set('Content-Type', 'application/json');
     }
 
     if (token) {
       headers.set('Authorization', `Bearer ${token}`);
+      console.log(`📡 ${endpoint} - Token sent`);
+    } else {
+      console.warn(`⚠️ ${endpoint} - No token available`);
     }
 
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -43,17 +56,15 @@ class ApiService {
       headers,
     });
 
-    // Avoid JSON.parse crashes when server returns HTML/text/empty
     const contentType = response.headers.get('content-type') || '';
     const raw = await response.text();
-
     let data: any = null;
     const looksLikeJson = contentType.includes('application/json') || raw.trim().startsWith('{') || raw.trim().startsWith('[');
     if (raw && looksLikeJson) {
       try {
         data = JSON.parse(raw);
       } catch {
-        // keep data as null; we'll throw a helpful error below
+        // keep data as null
       }
     }
 
@@ -64,11 +75,10 @@ class ApiService {
           window.location.href = '/login';
         }
       }
-      const message = data?.message || (raw ? raw.slice(0, 200) : null) || 'Something went wrong';
+      const message = data?.message || data?.error || (raw ? raw.slice(0, 200) : null) || 'Something went wrong';
       throw new Error(message);
     }
 
-    // For successful responses, still handle unexpected non-JSON
     if (data === null) {
       throw new Error(raw ? raw.slice(0, 200) : 'Empty response');
     }
@@ -76,7 +86,6 @@ class ApiService {
     return data;
   }
 
-  // ============== HTTP Methods ==============
   async get(endpoint: string, options?: RequestInit) {
     return this.request(endpoint, { ...options, method: 'GET' });
   }
@@ -101,42 +110,34 @@ class ApiService {
     return this.request(endpoint, { ...options, method: 'DELETE' });
   }
 
-  async patch(endpoint: string, body?: any, options?: RequestInit) {
-    return this.request(endpoint, {
-      ...options,
-      method: 'PATCH',
-      body: body instanceof FormData ? body : JSON.stringify(body),
-    });
-  }
-
-  // ============== Auth endpoints ==============
+  // Auth
   async login(email: string, password: string) {
-    const data = await this.post('/auth/login', { email, password });
-    
-    if (data.token) {
-      this.setToken(data.token);
+    console.log('🔐 Login called');
+    const response = await this.post('/admin/demo-login', { email, password });
+    console.log('📥 Login response:', response);
+    if (response.token) {
+      this.setToken(response.token);
+      console.log('✅ Token saved from login');
     }
-    
-    return data;
+    return response;
   }
 
   async getProfile() {
-    return this.get('/auth/me');
+    return this.get('/auth/profile');
   }
 
-  // ============== Admin endpoints ==============
-  async getUsers(page: number = 1, limit: number = 10, search?: string) {
-    let url = `/admin/users?page=${page}&limit=${limit}`;
-    if (search) url += `&search=${search}`;
-    return this.get(url);
+  // Dashboard
+  async getDashboardOverview() {
+    console.log('📊 getDashboardOverview called');
+    return this.get('/admin/dashboard');
+  }
+
+  async getUsers(page: number = 1, limit: number = 10) {
+    return this.get(`/admin/users?page=${page}&limit=${limit}`);
   }
 
   async getUserStats() {
     return this.get('/admin/stats');
-  }
-
-  async getDashboardOverview() {
-    return this.get('/admin/dashboard');
   }
 
   async updateUser(userId: string, data: any) {
@@ -146,44 +147,11 @@ class ApiService {
   async deleteUser(userId: string) {
     return this.delete(`/admin/users/${userId}`);
   }
-
-  async createUser(userData: any) {
-    return this.post('/admin/users', userData);
-  }
-
-  // ============== Course endpoints ==============
-  async getCourses() {
-    return this.get('/courses');
-  }
-
-  async createCourse(courseData: any) {
-    return this.post('/courses', courseData);
-  }
-
-  async updateCourse(courseId: string, courseData: any) {
-    return this.put(`/courses/${courseId}`, courseData);
-  }
-
-  async deleteCourse(courseId: string) {
-    return this.delete(`/courses/${courseId}`);
-  }
-
-  // ============== Category endpoints ==============
-  async getCategories() {
-    return this.get('/categories');
-  }
-
-  async createCategory(categoryData: any) {
-    return this.post('/categories', categoryData);
-  }
-
-  // ============== File upload ==============
-  async uploadFile(file: File, type: string = 'image') {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('type', type);
-    return this.post('/upload', formData);
-  }
 }
 
 export const apiService = new ApiService();
+
+// Make it available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as any).apiService = apiService;
+}
