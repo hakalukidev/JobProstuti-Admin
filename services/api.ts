@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://job-backend-production-fe91.up.railway.app/api';
 
 class ApiService {
   private token: string | null = null;

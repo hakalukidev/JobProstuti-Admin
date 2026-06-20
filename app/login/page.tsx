@@ -6,9 +6,8 @@ import { useState } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@gmail.com');
-  const [password, setPassword] = useState('admin123');
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState(''); // ✅ খালি
+  const [password, setPassword] = useState(''); // ✅ খালি
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -18,34 +17,25 @@ export default function LoginPage() {
     setShowAlert(false);
 
     try {
-      console.log('🔐 Logging in with:', email);
-      
-      const response = await fetch('http://localhost:8081/api/admin/demo-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
-      
-      const data = await response.json();
-      console.log('📥 Login response:', data);
-      
-      if (data.success && data.token) {
-        localStorage.setItem('admin_token', data.token);
-        apiService.setToken(data.token);
-        console.log('✅ Token saved');
-        
-        document.cookie = 'isLoggedIn=true; path=/; max-age=86400; SameSite=Strict';
-        
-        setTimeout(() => {
-          router.push('/dashboard');
-        }, 500);
-        
+      // ✅ API service ব্যবহার করুন (direct fetch না)
+      const response = await apiService.login(email, password);
+
+      if (response?.success) {
+        const cookieParts = [
+          'isLoggedIn=true',
+          'path=/',
+          `max-age=${60 * 60 * 24}`,
+          'SameSite=Strict',
+          window.location.protocol === 'https:' ? 'Secure' : '',
+        ].filter(Boolean);
+
+        document.cookie = cookieParts.join('; ');
+        router.push('/dashboard');
         return;
       }
 
       setShowAlert(true);
-    } catch (error: any) {
-      console.error('❌ Login error:', error);
+    } catch {
       setShowAlert(true);
     } finally {
       setIsLoading(false);
@@ -53,12 +43,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/20 text-slate-900 font-sans antialiased flex items-center justify-center relative py-12 px-4 sm:px-6 lg:px-8 overflow-x-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-white via-emerald-50/30 to-teal-50/20 text-slate-900 font-sans antialiased flex items-center justify-center relative py-12 px-4 sm:px-6 lg:px-8 overflow-x-hidden selection:bg-emerald-600 selection:text-white">
+      
+      {/* Decorative Background Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] z-0 opacity-40 pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         
+        {/* LEFT COLUMN: LOGIN FORM */}
         <div className="w-full sm:max-w-md mx-auto lg:max-w-none lg:col-span-5 flex flex-col justify-center">
+          
           <div className="flex items-center gap-3 mb-10">
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-lg shadow-emerald-200 flex-shrink-0">
               <svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -86,7 +80,7 @@ export default function LoginPage() {
                 type="email"
                 required
                 disabled={isLoading}
-                placeholder="admin@gmail.com"
+                placeholder="আপনার ইমেইল লিখুন"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-slate-50 disabled:text-slate-400 shadow-sm"
@@ -99,30 +93,23 @@ export default function LoginPage() {
                   পাসওয়ার্ড
                 </label>
               </div>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  disabled={isLoading}
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 pr-12 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-slate-50 disabled:text-slate-400 shadow-sm"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  {showPassword ? '🙈' : '👁️'}
-                </button>
-              </div>
+              <input
+                id="password"
+                type="password"
+                required
+                disabled={isLoading}
+                placeholder="আপনার পাসওয়ার্ড লিখুন"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-slate-50 disabled:text-slate-400 shadow-sm"
+              />
             </div>
 
             {showAlert && (
               <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium rounded-xl p-3.5 flex items-center gap-2.5">
-                <span>❌</span>
+                <svg className="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
                 <span>ইমেইল বা পাসওয়ার্ড ভুল হয়েছে</span>
               </div>
             )}
@@ -130,10 +117,13 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md shadow-emerald-200 flex items-center justify-center gap-2 disabled:bg-slate-300 disabled:cursor-not-allowed"
+              className="w-full h-12 rounded-xl font-semibold text-sm text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md shadow-emerald-200 flex items-center justify-center gap-2 disabled:bg-slate-300 disabled:from-none disabled:to-none disabled:cursor-not-allowed"
             >
               {isLoading ? (
-                <span>⏳ লগইন হচ্ছে...</span>
+                <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
               ) : (
                 'লগইন করুন'
               )}
@@ -141,6 +131,7 @@ export default function LoginPage() {
           </form>
         </div>
 
+        {/* RIGHT COLUMN */}
         <div className="hidden lg:flex lg:col-span-7 flex-col gap-6 w-full">
           <div className="relative rounded-2xl overflow-hidden border border-emerald-100 shadow-xl shadow-emerald-100/30 bg-gradient-to-br from-emerald-500/10 to-teal-500/10 w-full h-[400px]">
             <img
@@ -152,9 +143,48 @@ export default function LoginPage() {
             <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-emerald-900/80 to-transparent">
               <p className="text-lg font-bold text-white">Job Prostuti Admin Panel</p>
               <p className="text-sm text-white/80 mt-1">প্ল্যাটফর্ম পরিচালনা করুন আত্মবিশ্বাসের সাথে</p>
+              <div className="flex items-center gap-2 mt-3">
+                <div className="flex -space-x-2">
+                  {['🎓', '📚', '💼', '📊'].map((emoji, i) => (
+                    <div key={i} className="w-7 h-7 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-xs">
+                      {emoji}
+                    </div>
+                  ))}
+                </div>
+                <span className="text-xs text-white/80">১৫,৪২০+ সক্রিয় ব্যবহারকারী</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-5">
+            {[
+              { title: 'মোট ব্যবহারকারী', value: '১৫,৪২০', icon: '👥', color: 'from-emerald-500 to-emerald-600', bg: 'bg-emerald-50' },
+              { title: 'সক্রিয় সাবস্ক্রিপশন', value: '৫,৪০১', icon: '📊', color: 'from-teal-500 to-teal-600', bg: 'bg-teal-50' },
+              { title: 'মোট পরীক্ষা', value: '২৫৬', icon: '📝', color: 'from-green-500 to-green-600', bg: 'bg-green-50' },
+            ].map((metric, idx) => (
+              <div key={idx} className={`${metric.bg} rounded-xl p-4 border border-${metric.color.split(' ')[1].replace('from-', '')}/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-1`}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-2xl">{metric.icon}</span>
+                  <div className={`w-8 h-8 rounded-full bg-gradient-to-r ${metric.color} opacity-20`}></div>
+                </div>
+                <p className="text-2xl font-bold text-slate-800">{metric.value}</p>
+                <p className="text-[11px] font-medium text-slate-500 mt-1">{metric.title}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center justify-between pt-3 border-t border-emerald-100">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+              <span className="text-xs text-slate-500">সিস্টেম সচল</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <span className="text-xs text-slate-400">🔒 SSL সুরক্ষিত</span>
+              <span className="text-xs text-slate-400">⚡ রিয়েল-টাইম আপডেট</span>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
