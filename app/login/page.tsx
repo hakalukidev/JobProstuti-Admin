@@ -6,8 +6,8 @@ import { useState } from 'react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@gmail.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState(''); // ✅ খালি
+  const [password, setPassword] = useState(''); // ✅ খালি
   const [showPassword, setShowPassword] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,18 +20,14 @@ export default function LoginPage() {
     try {
       console.log('🔐 Logging in with:', email);
       
-      const response = await fetch('http://localhost:8081/api/admin/demo-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
-      });
+      // ✅ apiService.login ব্যবহার করুন
+      const response = await apiService.login(email, password);
       
-      const data = await response.json();
-      console.log('📥 Login response:', data);
+      console.log('📥 Login response:', response);
       
-      if (data.success && data.token) {
-        localStorage.setItem('admin_token', data.token);
-        apiService.setToken(data.token);
+      if (response.success && response.token) {
+        localStorage.setItem('admin_token', response.token);
+        apiService.setToken(response.token);
         console.log('✅ Token saved');
         
         document.cookie = 'isLoggedIn=true; path=/; max-age=86400; SameSite=Strict';
@@ -86,7 +82,7 @@ export default function LoginPage() {
                 type="email"
                 required
                 disabled={isLoading}
-                placeholder="admin@gmail.com"
+                placeholder="আপনার ইমেইল লিখুন" // ✅ পরিবর্তন
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-slate-50 disabled:text-slate-400 shadow-sm"
@@ -105,7 +101,7 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"}
                   required
                   disabled={isLoading}
-                  placeholder="••••••••"
+                  placeholder="আপনার পাসওয়ার্ড লিখুন" // ✅ পরিবর্তন
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 pr-12 text-sm text-slate-900 outline-none transition-all placeholder:text-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-slate-50 disabled:text-slate-400 shadow-sm"
