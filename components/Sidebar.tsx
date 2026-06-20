@@ -1,8 +1,8 @@
 'use client';
 
+import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 
 const Sidebar = () => {
   const pathname = usePathname();
@@ -61,7 +61,7 @@ const Sidebar = () => {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-slate-900 truncate">{user?.name || 'Admin'}</p>
-            <p className="text-xs text-slate-500 truncate">{user?.email || 'admin@jobprostuti.com'}</p>
+            <p className="text-xs text-slate-500 truncate">{user?.email || 'guest user'}</p>
           </div>
         </div>
         <button
