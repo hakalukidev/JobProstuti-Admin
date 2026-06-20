@@ -1,5 +1,5 @@
 // services/api.ts
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8081';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://job-backend-production-fe91.up.railway.app';
 
 class ApiService {
   private token: string | null = null;
@@ -117,7 +117,7 @@ class ApiService {
     return this.request(endpoint, { ...options, method: 'DELETE' });
   }
 
-  // ✅ Auth - endpoint গুলোতে /api যোগ করুন
+  // ✅ Auth
   async login(email: string, password: string) {
     console.log('🔐 Login called');
     const response = await this.post('/api/admin/demo-login', { email, password });
@@ -133,18 +133,15 @@ class ApiService {
     return this.get('/api/auth/profile');
   }
 
-  // Dashboard
+  // ✅ Dashboard
   async getDashboardOverview() {
     console.log('📊 getDashboardOverview called');
     return this.get('/api/admin/dashboard');
   }
 
+  // ✅ Users
   async getUsers(page: number = 1, limit: number = 10) {
     return this.get(`/api/admin/users?page=${page}&limit=${limit}`);
-  }
-
-  async getUserStats() {
-    return this.get('/api/admin/stats');
   }
 
   async updateUser(userId: string, data: any) {
@@ -153,6 +150,29 @@ class ApiService {
 
   async deleteUser(userId: string) {
     return this.delete(`/api/admin/users/${userId}`);
+  }
+
+  // ✅ ============== QUESTIONS ==============
+  async getQuestions(category?: string, limit: number = 100) {
+    let url = '/api/admin/questions';
+    const params = new URLSearchParams();
+    if (category && category !== 'all') params.append('category', category);
+    params.append('limit', String(limit));
+    if (params.toString()) url += `?${params.toString()}`;
+    console.log('📡 getQuestions URL:', url);
+    return this.get(url);
+  }
+
+  async createQuestion(data: any) {
+    return this.post('/api/admin/content/questions', data);
+  }
+
+  async updateQuestion(id: string, data: any) {
+    return this.put(`/api/admin/questions/${id}`, data);
+  }
+
+  async deleteQuestion(id: string) {
+    return this.delete(`/api/admin/questions/${id}`);
   }
 }
 
