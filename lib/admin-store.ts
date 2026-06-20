@@ -43,7 +43,57 @@ export interface AdminCredentials {
   password: string;
 }
 
-// ✅ আসল API থেকে ডেটা আনুন
+// ✅ ডেমো ক্রেডেনশিয়াল (API থেকে নেবে)
+export function getDemoAdminCredentials(): AdminCredentials | null {
+  // শুধু ডেভেলপমেন্টের জন্য
+  if (process.env.NODE_ENV === 'development') {
+    return {
+      email: process.env.NEXT_PUBLIC_DEMO_ADMIN_EMAIL || 'admin@jobprostuti.com',
+      password: process.env.NEXT_PUBLIC_DEMO_ADMIN_PASSWORD || 'admin123',
+    };
+  }
+  return null;
+}
+
+// ✅ Token তৈরি করুন
+export function createTokenPayload(user: AdminUser) {
+  return Buffer.from(JSON.stringify({
+    sub: user._id,
+    email: user.email,
+    role: user.role,
+    name: user.name,
+  })).toString('base64url');
+}
+
+// ✅ Token পার্স করুন
+export function parseTokenPayload(token: string) {
+  try {
+    return JSON.parse(Buffer.from(token, 'base64url').toString('utf8')) as {
+      sub?: string;
+      email?: string;
+      role?: string;
+      name?: string;
+    };
+  } catch {
+    return null;
+  }
+}
+
+// ✅ ইউজার লিস্ট (API থেকে)
+export async function getUsers() {
+  try {
+    const response = await apiService.getUsers();
+    if (response?.success && response?.users) {
+      return response.users;
+    }
+    return [];
+  } catch (error) {
+    console.error('❌ Users fetch error:', error);
+    return [];
+  }
+}
+
+// ✅ ড্যাশবোর্ড ডেটা
 export async function getDashboardOverview(): Promise<DashboardOverview> {
   try {
     const response = await apiService.getDashboardOverview();
@@ -53,7 +103,6 @@ export async function getDashboardOverview(): Promise<DashboardOverview> {
     throw new Error('Failed to fetch dashboard data');
   } catch (error) {
     console.error('❌ Dashboard fetch error:', error);
-    // Fallback data (শুধু error হলে)
     return {
       stats: {
         totalUsers: 0,
@@ -68,19 +117,6 @@ export async function getDashboardOverview(): Promise<DashboardOverview> {
       recentActivities: [],
       users: [],
     };
-  }
-}
-
-export async function getUsers() {
-  try {
-    const response = await apiService.getUsers();
-    if (response?.success && response?.users) {
-      return response.users;
-    }
-    return [];
-  } catch (error) {
-    console.error('❌ Users fetch error:', error);
-    return [];
   }
 }
 
@@ -133,13 +169,6 @@ export async function createUser(data: Pick<AdminUser, 'name' | 'email' | 'role'
   }
 }
 
-// ✅ ডেমো ক্রেডেনশিয়াল সরান
-export function getDemoAdminCredentials(): AdminCredentials | null {
-  // ডেমো ক্রেডেনশিয়াল সরিয়ে দেওয়া হয়েছে
-  return null;
-}
-
-// ✅ সঠিক লগইন ব্যবহার করুন
 export async function login(email: string, password: string) {
   try {
     const response = await apiService.login(email, password);
